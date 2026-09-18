@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TrainTrack — Weekly Fitness Tracker</title>
+<style>
+:root{--bg:#f5f7f4;--card:#fff;--text:#182018;--muted:#687268;--accent:#2f6b45;--accent2:#dfeee3;--border:#e4e9e3;--danger:#b54b4b;--shadow:0 10px 30px rgba(20,40,25,.07)}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button{font:inherit;cursor:pointer} .app{max-width:1180px;margin:auto;padding:24px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}.brand{font-weight:800;font-size:24px}.brand span{color:var(--accent)}
+.badge{background:var(--accent2);color:var(--accent);padding:7px 12px;border-radius:999px;font-weight:700}
+.hero{background:var(--accent);color:white;border-radius:24px;padding:30px;margin-bottom:20px;display:flex;justify-content:space-between;gap:24px;align-items:center}.hero h1{font-size:34px;margin:0 0 7px}.hero p{margin:0;opacity:.86}.progress-wrap{min-width:220px}.progress-label{display:flex;justify-content:space-between;font-size:13px;margin-bottom:7px}.progress{height:9px;background:rgba(255,255,255,.22);border-radius:10px;overflow:hidden}.progress i{display:block;height:100%;background:white;border-radius:10px;width:0}
+.tabs{display:flex;gap:8px;margin-bottom:18px;overflow:auto}.tab{border:1px solid var(--border);background:white;padding:10px 16px;border-radius:12px;color:var(--muted);font-weight:700}.tab.active{background:var(--text);color:white;border-color:var(--text)}
+.grid{display:grid;grid-template-columns:1.55fr 1fr;gap:18px}.card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:20px;box-shadow:var(--shadow)}.card h2{font-size:18px;margin:0 0 4px}.sub{color:var(--muted);font-size:13px;margin-bottom:16px}
+.days{display:grid;grid-template-columns:repeat(7,1fr);gap:7px;margin-bottom:18px}.day{border:1px solid var(--border);background:#fafbfa;border-radius:12px;padding:9px 3px;text-align:center}.day small{display:block;color:var(--muted);font-size:10px}.day strong{font-size:13px}.day.done{background:var(--accent2);border-color:#c9e0cf}.day.today{outline:2px solid var(--accent)}
+.workout{border:1px solid var(--border);border-radius:15px;padding:14px;margin:10px 0;display:flex;align-items:center;gap:12px}.check{width:22px;height:22px;border-radius:7px;border:2px solid #b8c1b9;display:grid;place-items:center;flex:none;background:white}.workout.completed .check{background:var(--accent);border-color:var(--accent);color:white}.workout.completed .name{text-decoration:line-through;color:var(--muted)}.name{font-weight:750}.meta{font-size:12px;color:var(--muted)}.tag{margin-left:auto;background:#f0f3ef;padding:5px 8px;border-radius:8px;font-size:11px;font-weight:700}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:14px}.stat{background:#f7f9f7;border-radius:14px;padding:12px}.stat b{font-size:22px;display:block}.stat span{font-size:11px;color:var(--muted)}
+.meal{display:flex;justify-content:space-between;gap:10px;padding:13px 0;border-bottom:1px solid var(--border)}.meal:last-child{border-bottom:0}.meal b{display:block}.meal small{color:var(--muted)}.cal{font-weight:800;white-space:nowrap}.nutrition-total{background:var(--accent2);border-radius:15px;padding:14px;margin-top:12px;display:flex;justify-content:space-between}.macro{display:flex;gap:16px;color:var(--muted);font-size:12px}.macro b{color:var(--text)}
+.tip{background:#fff8e7;border:1px solid #f1e3bb;border-radius:15px;padding:14px;margin-top:14px}.tip b{display:block;margin-bottom:3px}.checklist label{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);align-items:center}.checklist input{accent-color:var(--accent);width:18px;height:18px}
+.section{display:none}.section.active{display:block}.note{font-size:12px;color:var(--muted);margin-top:18px;text-align:center}
+@media(max-width:800px){.grid{grid-template-columns:1fr}.hero{flex-direction:column;align-items:flex-start}.progress-wrap{width:100%}}@media(max-width:520px){.app{padding:14px}.hero h1{font-size:28px}.days{gap:4px}.day{padding:7px 1px}.stats{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+<header><div class="brand">Train<span>Track</span></div><div class="badge">Week 1 · 18–24 Sep</div></header>
+
+<section class="hero">
+  <div><h1>Let’s make this week count.</h1><p>Follow your plan, tick off each session, and stay consistent.</p></div>
+  <div class="progress-wrap"><div class="progress-label"><span>Weekly progress</span><b id="progressText">0%</b></div><div class="progress"><i id="progressBar"></i></div></div>
+</section>
+
+<div class="tabs">
+<button class="tab active" data-tab="routine">Weekly Routine</button>
+<button class="tab" data-tab="nutrition">Nutrition</button>
+<button class="tab" data-tab="habits">Daily Habits</button>
+</div>
+
+<section id="routine" class="section active">
+<div class="grid">
+<div class="card">
+<h2>This week’s training</h2><div class="sub">Complete the sessions prescribed for each day.</div>
+<div class="days" id="days"></div>
+<div id="workouts"></div>
+</div>
+<div>
+<div class="card"><h2>Weekly snapshot</h2><div class="sub">Your consistency at a glance.</div>
+<div class="stats"><div class="stat"><b id="doneCount">0</b><span>sessions done</span></div><div class="stat"><b>4</b><span>sessions planned</span></div><div class="stat"><b id="habitCount">0</b><span>habits checked</span></div></div>
+<div class="tip"><b>Coach’s note</b>Quality over intensity. If something hurts beyond normal training discomfort, stop and tell your coach.</div>
+</div>
+</div>
+</div>
+</section>
+
+<section id="nutrition" class="section">
+<div class="grid">
+<div class="card"><h2>Today’s nutrition plan</h2><div class="sub">Use this as a template and follow any individualized guidance from your coach or clinician.</div>
+<div id="meals"></div>
+<div class="nutrition-total"><div><b>Daily target</b><div class="macro"><span><b>120g</b> protein</span><span><b>180g</b> carbs</span><span><b>55g</b> fat</span></div></div><b>~1,700 kcal</b></div>
+</div>
+<div class="card"><h2>Nutrition checklist</h2><div class="sub">Small actions that add up.</div>
+<div class="checklist">
+<label><input type="checkbox" data-habit> Protein included in main meals</label>
+<label><input type="checkbox" data-habit> 2+ litres of water</label>
+<label><input type="checkbox" data-habit> Fruit/vegetables included</label>
+<label><input type="checkbox" data-habit> Planned snack instead of impulse eating</label>
+</div>
+</div>
+</div>
+</section>
+
+<section id="habits" class="section">
+<div class="card"><h2>Daily habits</h2><div class="sub">Check these off before you call the day done.</div>
+<div class="checklist">
+<label><input type="checkbox" data-habit> Completed planned workout / active recovery</label>
+<label><input type="checkbox" data-habit> Hit water target</label>
+<label><input type="checkbox" data-habit> Followed nutrition plan</label>
+<label><input type="checkbox" data-habit> 7–8 hours sleep / protected bedtime</label>
+<label><input type="checkbox" data-habit> 10-minute mobility or stretching</label>
+</div>
+</div>
+</section>
+<div class="note">This tracker is a coaching template. Nutrition targets should be individualized for each trainee.</div>
+</div>
+
+<script>
+const workouts=[
+["Mon","Strength A","Lower body · 50 min","Strength"],
+["Tue","Zone 2 Cardio","30–40 min","Cardio"],
+["Wed","Rest / Mobility","15–20 min mobility","Recovery"],
+["Thu","Strength B","Upper body · 50 min","Strength"],
+["Fri","Rest","Optional walk","Recovery"],
+["Sat","Full Body","45–60 min","Strength"],
+["Sun","Rest","Recovery + prep","Recovery"]
+];
+const meals=[
+["Breakfast","Greek yogurt + oats + berries","350 kcal"],
+["Lunch","Rice/roti + lean protein + cooked vegetables","500 kcal"],
+["Snack","Fruit + protein-rich snack","200 kcal"],
+["Dinner","Protein + vegetables + carbohydrate of choice","500 kcal"],
+["Flex","Tea/coffee or small planned treat","150 kcal"]
+];
+let completed=JSON.parse(localStorage.getItem("tt-workouts")||"[]");
+function render(){
+document.getElementById("days").innerHTML=workouts.map((w,i)=>`<div class="day ${completed.includes(i)?'done':''}"><small>${w[0]}</small><strong>${w[1].split(' ')[0]}</strong></div>`).join("");
+document.getElementById("workouts").innerHTML=workouts.map((w,i)=>`<div class="workout ${completed.includes(i)?'completed':''}" onclick="toggle(${i})"><div class="check">${completed.includes(i)?'✓':''}</div><div><div class="name">${w[1]}</div><div class="meta">${w[2]}</div></div><span class="tag">${w[3]}</span></div>`).join("");
+document.getElementById("doneCount").textContent=completed.length;
+let p=Math.round(completed.length/workouts.length*100);document.getElementById("progressText").textContent=p+"%";document.getElementById("progressBar").style.width=p+"%";
+document.getElementById("habitCount").textContent=document.querySelectorAll("[data-habit]:checked").length;
+}
+function toggle(i){completed=completed.includes(i)?completed.filter(x=>x!==i):[...completed,i];localStorage.setItem("tt-workouts",JSON.stringify(completed));render()}
+document.getElementById("meals").innerHTML=meals.map(m=>`<div class="meal"><div><b>${m[0]}</b><small>${m[1]}</small></div><span class="cal">${m[2]}</span></div>`).join("");
+document.querySelectorAll("[data-habit]").forEach((el,i)=>{el.checked=JSON.parse(localStorage.getItem("tt-habit-"+i)||"false");el.addEventListener("change",()=>{localStorage.setItem("tt-habit-"+i,el.checked);render()})});
+document.querySelectorAll(".tab").forEach(btn=>btn.addEventListener("click",()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));document.querySelectorAll(".section").forEach(x=>x.classList.remove("active"));btn.classList.add("active");document.getElementById(btn.dataset.tab).classList.add("active")}));
+render();
+</script>
+</body>
+</html>
